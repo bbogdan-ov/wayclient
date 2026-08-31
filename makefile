@@ -1,6 +1,6 @@
-main: main.c protocols/xdg-shell.c
-	@gcc -Wall -ggdb -fsanitize=address -fsanitize=leak -fsanitize=undefined -o main \
-		main.c protocols/xdg-shell.c \
+check: wayclient.c wayclient.h protocols/xdg-shell.c
+	@gcc -Wall -ggdb -fsyntax-only \
+		wayclient.c protocols/xdg-shell.c \
 		-lwayland-client -lm
 
 protocols/xdg-shell.c: protocols/xdg-shell.xml
