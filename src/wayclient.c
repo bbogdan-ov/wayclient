@@ -198,7 +198,12 @@ struct wl_buffer_listener wayclient__wl_buffer_listener = {
 // ------------------------------
 
 wayclient_error
-wayclient_init(wayclient_state *state) {
+wayclient_init(wayclient_state *state, uint32_t width, uint32_t height) {
+	memset(state, 0, sizeof(wayclient_state));
+
+	state->width = width;
+	state->height = height;
+
 	state->wl_display = wl_display_connect(NULL);
 	if (state->wl_display == NULL) {
 		return WAYCLIENT_ERR_CONNECT;
@@ -209,7 +214,7 @@ wayclient_init(wayclient_state *state) {
 		return WAYCLIENT_ERR_GET_OBJECTS;
 	}
 
-	wl_registry_add_listener(state->wl_registry, &wayclient__wl_registry_listener, &state);
+	wl_registry_add_listener(state->wl_registry, &wayclient__wl_registry_listener, state);
 	wl_display_roundtrip(state->wl_display);
 
 	// Expect these regsitry objects to be presented by the compositor:
@@ -217,7 +222,7 @@ wayclient_init(wayclient_state *state) {
 	if (state->wl_shm == NULL)        return WAYCLIENT_ERR_GET_OBJECTS;
 	if (state->xdg_wm_base == NULL)   return WAYCLIENT_ERR_GET_OBJECTS;
 
-	xdg_wm_base_add_listener(state->xdg_wm_base, &wayclient__xdg_wm_base_listener, &state);
+	xdg_wm_base_add_listener(state->xdg_wm_base, &wayclient__xdg_wm_base_listener, state);
 
 	state->wl_surface = wl_compositor_create_surface(state->wl_compositor);
 	if (state->wl_surface == NULL) return WAYCLIENT_ERR_CREATE_SURFACE;
@@ -229,10 +234,10 @@ wayclient_init(wayclient_state *state) {
 	if (state->xdg_toplevel == NULL) return WAYCLIENT_ERR_CREATE_TOPLEVEL;
 
 	state->wl_frame_callback = wl_surface_frame(state->wl_surface);
-	wl_callback_add_listener(state->wl_frame_callback, &wayclient__frame_callback_listener, &state);
+	wl_callback_add_listener(state->wl_frame_callback, &wayclient__frame_callback_listener, state);
 
-	xdg_surface_add_listener(state->xdg_surface, &wayclient__xdg_surface_listener, &state);
-	xdg_toplevel_add_listener(state->xdg_toplevel, &wayclient__xdg_toplevel_listener, &state);
+	xdg_surface_add_listener(state->xdg_surface, &wayclient__xdg_surface_listener, state);
+	xdg_toplevel_add_listener(state->xdg_toplevel, &wayclient__xdg_toplevel_listener, state);
 
 	wl_surface_commit(state->wl_surface);
 
@@ -241,6 +246,8 @@ wayclient_init(wayclient_state *state) {
 
 void
 wayclient_destroy(wayclient_state *state) {
+	state->prev_width = state->width;
+	state->prev_height = state->height;
 	wayclient__destroy_and_unmap_buffers(state);
 
 	if (state->wl_frame_callback != NULL)
@@ -331,7 +338,9 @@ wayclient__first_released_buffer_index(wayclient_state *state) {
 
 void
 wayclient__update_buffers_size(wayclient_state *state) {
-	if (state->width == 0 && state->height == 0) return;
+	if (state->width < 1) state->width = 1;
+	if (state->height < 1) state->height = 1;
+	if (state->prev_width == state->width && state->prev_height == state->height) return;
 
 	wayclient__destroy_and_unmap_buffers(state);
 
@@ -370,17 +379,10 @@ wayclient__update_buffers_size(wayclient_state *state) {
 	wl_shm_pool_destroy(wl_pool);
 	close(fd);
 
+	state->prev_width = state->width;
+	state->prev_height = state->height;
+
 	wayclient_logf("Buffers resized: %dx%d", state->width, state->height);
-}
-
-int
-wayclient__current_buffer_size(wayclient_state *state) {
-	return state->width * state->height * WAYCLIENT_PIXEL_SIZE;
-}
-
-int
-wayclient__current_pool_size(wayclient_state *state) {
-	return wayclient__current_buffer_size(state) * WAYCLIENT_BUFFER_COUNT;
 }
 
 void
@@ -394,7 +396,8 @@ wayclient__destroy_and_unmap_buffers(wayclient_state *state) {
 	}
 
 	if (state->pool_data != NULL) {
-		munmap(state->pool_data, wayclient__current_pool_size(state));
+		size_t pool_size = state->prev_width * state->prev_height * WAYCLIENT_PIXEL_SIZE * WAYCLIENT_BUFFER_COUNT;
+		munmap(state->pool_data, pool_size);
 		state->pool_data = NULL;
 	}
 }

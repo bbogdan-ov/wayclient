@@ -61,6 +61,7 @@ typedef struct {
 	struct xdg_toplevel  *xdg_toplevel;
 
 	uint32_t             width, height;
+	uint32_t             prev_width, prev_height;
 	bool                 should_close;
 } wayclient_state;
 
@@ -70,7 +71,7 @@ typedef struct {
 
 // Initialize a state for a top-level XDG window.
 wayclient_error
-wayclient_init(wayclient_state *state);
+wayclient_init(wayclient_state *state, uint32_t width, uint32_t height);
 
 // Clean up the memory and disconnect from the Wayland display.
 void
@@ -106,18 +107,9 @@ wayclient__draw(wayclient_state *state);
 uint32_t
 wayclient__first_released_buffer_index(wayclient_state *state);
 
-// Update buffers and SHM pool size accordingly to the current window size.
+// Update buffers and SHM pool accordingly to the current window size.
 void
 wayclient__update_buffers_size(wayclient_state *state);
-
-// Returns the size of a single buffer based on the current size of the window.
-int
-wayclient__current_buffer_size(wayclient_state *state);
-
-// Returns the size of a SHM pool based on the size of a single buffer and
-// an amount of buffers.
-int
-wayclient__current_pool_size(wayclient_state *state);
 
 void
 wayclient__destroy_and_unmap_buffers(wayclient_state *state);
