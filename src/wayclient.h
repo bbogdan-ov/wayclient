@@ -55,6 +55,7 @@ struct wayclient_state {
 	uint32_t             width, height;
 	uint32_t             prev_width, prev_height;
 	bool                 should_close;
+	bool                 resizable;
 
 	// Callbacks.
 	void                 *userdata; // Custom user data that is passed to the callbacks.
@@ -66,34 +67,15 @@ struct wayclient_state {
 // Public functions.
 // ------------------------------
 
-// Initialize a state for a top-level XDG window.
-wayclient_error
+void
 wayclient_init(wayclient_state *state, uint32_t width, uint32_t height);
+
+wayclient_error
+wayclient_run(wayclient_state *state);
 
 // Clean up the memory and disconnect from the Wayland display.
 void
 wayclient_destroy(wayclient_state *state);
-
-// Process incoming events.
-// Return false if something went wrong.
-// Should be used as a condition in an infinite loop.
-bool
-wayclient_dispatch(wayclient_state *state);
-
-void
-wayclient_set_title(wayclient_state *state, const char *title);
-
-void
-wayclient_set_app_id(wayclient_state *state, const char *app_id);
-
-void
-wayclient_set_size(wayclient_state *state, uint32_t width, uint32_t height);
-
-void
-wayclient_set_max_size(wayclient_state *state, uint32_t max_width, uint32_t max_height);
-
-void
-wayclient_set_min_size(wayclient_state *state, uint32_t min_width, uint32_t min_height);
 
 // ------------------------------
 // Internal functions.

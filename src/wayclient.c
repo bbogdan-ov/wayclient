@@ -130,6 +130,7 @@ wayclient__xdg_toplevel_handle_configure(
 	struct wl_array *states
 ) {
 	wayclient_state *state = data;
+	if (!state->resizable) return;
 	if (width != state->width || height != state->height) {
 		state->width = width;
 		state->height = height;
@@ -192,13 +193,16 @@ struct wl_buffer_listener wayclient__wl_buffer_listener = {
 // Public functions.
 // ------------------------------
 
-wayclient_error
+void
 wayclient_init(wayclient_state *state, uint32_t width, uint32_t height) {
 	memset(state, 0, sizeof(wayclient_state));
-
 	state->width = width;
 	state->height = height;
+	state->resizable = true;
+}
 
+wayclient_error
+wayclient_run(wayclient_state *state) {
 	state->wl_display = wl_display_connect(NULL);
 	if (state->wl_display == NULL) {
 		return WAYCLIENT_ERR_CONNECT;
@@ -256,36 +260,6 @@ wayclient_destroy(wayclient_state *state) {
 	wl_compositor_destroy(state->wl_compositor);
 	wl_registry_destroy(state->wl_registry);
 	wl_display_disconnect(state->wl_display);
-}
-
-bool
-wayclient_dispatch(wayclient_state *state) {
-	return wl_display_dispatch(state->wl_display) != -1;
-}
-
-void
-wayclient_set_title(wayclient_state *state, const char *title) {
-	xdg_toplevel_set_title(state->xdg_toplevel, title);
-}
-
-void
-wayclient_set_app_id(wayclient_state *state, const char *app_id) {
-	xdg_toplevel_set_app_id(state->xdg_toplevel, app_id);
-}
-
-void
-wayclient_set_size(wayclient_state *state, uint32_t width, uint32_t height) {
-	assert(false); // TODO!!:
-}
-
-void
-wayclient_set_max_size(wayclient_state *state, uint32_t max_width, uint32_t max_height) {
-	xdg_toplevel_set_max_size(state->xdg_toplevel, max_width, max_height);
-}
-
-void
-wayclient_set_min_size(wayclient_state *state, uint32_t min_width, uint32_t min_height) {
-	xdg_toplevel_set_min_size(state->xdg_toplevel, min_width, min_height);
 }
 
 // ------------------------------

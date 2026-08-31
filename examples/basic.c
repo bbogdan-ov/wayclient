@@ -33,15 +33,18 @@ void on_resize(wayclient_state *state, void *userdata) {
 
 int main() {
 	wayclient_state state;
-	wayclient_error err = wayclient_init(&state, 256, 256);
+	wayclient_init(&state, 512, 512);
+
+	wayclient_error err = wayclient_run(&state);
 	assert(err == WAYCLIENT_OK);
 
 	state.draw = draw;
 	state.on_resize = on_resize;
 
-	wayclient_set_title(&state, "basic");
+	xdg_toplevel_set_title(state.xdg_toplevel, "Basic example");
+	xdg_toplevel_set_app_id(state.xdg_toplevel, "basic_example");
 
-	while (wayclient_dispatch(&state) && !state.should_close) {}
+	while (wl_display_dispatch(state.wl_display) && !state.should_close) {}
 
 	wayclient_destroy(&state);
 
