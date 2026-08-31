@@ -1,17 +1,26 @@
-CFLAGS = -Wall
+CFLAGS = -Wall -lwayland-client
 
-EXAMPLE_CC = gcc $(CFLAGS) -ggdb -Isrc -lwayland-client src/*.c
+EXAMPLE_CC = gcc $(CFLAGS) -ggdb -Isrc src/*.c
 
-.PHONY: check examples
+.PHONY: protocols examples clean
 
-check: src/wayclient.c src/wayclient.h src/xdg_shell.c
-	@gcc $(CFLAGS) -fsyntax-only \
-		src/*.c \
-		-lwayland-client
+# Compile static library.
+build/libwayclient.a: src/*.c src/*.h
+	mkdir -p build
+	gcc $(CFLAGS) -O3 -c src/*.c
+	ar rcs build/libwayclient.a *.o
 
-src/xdg_shell.c: protocols/xdg_shell.xml
+# Generate protocols code.
+protocols:
 	wayland-scanner client-header protocols/xdg_shell.xml src/xdg_shell.h
 	wayland-scanner private-code protocols/xdg_shell.xml src/xdg_shell.c
 
+# Compile examples.
 examples:
-	$(EXAMPLE_CC) examples/basic.c -o examples/basic
+	mkdir -p build
+	$(EXAMPLE_CC) examples/basic.c -o build/basic
+
+# Clean the mess up after a compilation.
+clean:
+	rm *.o
+	rm -r build
