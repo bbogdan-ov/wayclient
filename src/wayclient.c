@@ -60,7 +60,6 @@ wayclient__xdg_wm_base_handle_ping(
 	uint32_t serial
 ) {
 	xdg_wm_base_pong(xdg_wm_base, serial);
-	wayclient_log("Event: xdg_wm_base.ping");
 }
 
 struct xdg_wm_base_listener wayclient__xdg_wm_base_listener = {
@@ -103,8 +102,6 @@ wayclient__xdg_surface_handle_configure(
 	struct xdg_surface *xdg_surface,
 	uint32_t serial
 ) {
-	wayclient_log("Event: xdg_surface.configure");
-
 	wayclient_state *state = data;
 
 	xdg_surface_ack_configure(xdg_surface, serial);
@@ -132,8 +129,6 @@ wayclient__xdg_toplevel_handle_configure(
 	int32_t height,
 	struct wl_array *states
 ) {
-	wayclient_log("Event: xdg_toplevel.configure");
-
 	wayclient_state *state = data;
 	if (width != state->width || height != state->height) {
 		state->width = width;
@@ -381,8 +376,6 @@ wayclient__update_buffers_size(wayclient_state *state) {
 
 	state->prev_width = state->width;
 	state->prev_height = state->height;
-
-	wayclient_logf("Buffers resized: %dx%d", state->width, state->height);
 }
 
 void
