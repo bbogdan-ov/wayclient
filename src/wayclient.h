@@ -6,26 +6,16 @@
 #include <wayland-client.h>
 #include "xdg_shell.h"
 
-#ifndef WAYCLIENT_NO_LOG
 #define wayclient_log(msg)       fprintf(stderr, "WAYCLIENT: "msg"\n")
 #define wayclient_logf(fmt, ...) fprintf(stderr, "WAYCLIENT: "fmt"\n", __VA_ARGS__)
-#endif
 
-#ifndef WAYCLIENT_PIXEL_FORMAT
 // Format of a pixel.
 #define WAYCLIENT_PIXEL_FORMAT WL_SHM_FORMAT_ARGB8888
 // Number of components in a pixel. (ARGB)
 #define WAYCLIENT_PIXEL_SIZE 4
-#endif
 
-#if !defined(WAYCLIENT_PIXEL_FORMAT) || !defined(WAYCLIENT_PIXEL_SIZE)
-#error "`WAYCLIENT_PIXEL_SIZE` must be defined as well as `WAYCLIENT_PIXEL_FORMAT`"
-#endif
-
-#ifndef WAYCLIENT_BUFFER_COUNT
 // Double-buffered by default.
 #define WAYCLIENT_BUFFER_COUNT 2
-#endif
 
 // ------------------------------
 // Types.
