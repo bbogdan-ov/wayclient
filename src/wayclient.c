@@ -258,6 +258,11 @@ wayclient_destroy(wayclient_state *state) {
 	wl_display_disconnect(state->wl_display);
 }
 
+bool
+wayclient_dispatch(wayclient_state *state) {
+	return wl_display_dispatch(state->wl_display) != -1;
+}
+
 void
 wayclient_set_title(wayclient_state *state, const char *title) {
 	xdg_toplevel_set_title(state->xdg_toplevel, title);

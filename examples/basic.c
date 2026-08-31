@@ -41,9 +41,7 @@ int main() {
 
 	wayclient_set_title(&state, "basic");
 
-	while (wl_display_dispatch(state.wl_display) != -1) {
-		if (state.should_close) break;
-	}
+	while (wayclient_dispatch(&state) && !state.should_close) {}
 
 	wayclient_destroy(&state);
 

@@ -74,6 +74,12 @@ wayclient_init(wayclient_state *state, uint32_t width, uint32_t height);
 void
 wayclient_destroy(wayclient_state *state);
 
+// Process incoming events.
+// Return false if something went wrong.
+// Should be used as a condition in an infinite loop.
+bool
+wayclient_dispatch(wayclient_state *state);
+
 void
 wayclient_set_title(wayclient_state *state, const char *title);
 
