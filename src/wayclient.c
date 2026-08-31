@@ -299,18 +299,12 @@ wayclient__draw(wayclient_state *state) {
 
 	wayclient_buffer *buffer = &state->buffers[buffer_index];
 
-	uint32_t *pixels = (uint32_t*)buffer->data;
-	memset(pixels, 0xff000000, state->width * state->height * WAYCLIENT_PIXEL_SIZE);
-
-	for (int y = 0; y < state->height; y ++) {
-		for (int x = 0; x < state->width; x ++) {
-			uint32_t color = 0xff111111;
-			int xx = x / 128;
-			int yy = y / 128;
-			if ((xx + yy) % 2 == 0) color = 0xffeeeeee;
-			pixels[x + y * state->width] = color;
-		}
-	}
+	if (state->draw != NULL) state->draw(
+		state,
+		buffer->data,
+		state->width * state->height * WAYCLIENT_PIXEL_SIZE,
+		state->userdata
+	);
 
 	buffer->attached = true;
 	wl_surface_attach(state->wl_surface, buffer->wl_buffer, 0, 0);
@@ -318,17 +312,6 @@ wayclient__draw(wayclient_state *state) {
 	wl_surface_commit(state->wl_surface);
 
 	return true;
-}
-
-uint32_t
-wayclient__first_released_buffer_index(wayclient_state *state) {
-	for (uint32_t i = 0; i < WAYCLIENT_BUFFER_COUNT; i ++) {
-		if (!state->buffers[i].attached) {
-			return i;
-		}
-	}
-
-	return -1;
 }
 
 void
@@ -374,8 +357,21 @@ wayclient__update_buffers_size(wayclient_state *state) {
 	wl_shm_pool_destroy(wl_pool);
 	close(fd);
 
+	if (state->on_resize != NULL) state->on_resize(state, state->userdata);
+
 	state->prev_width = state->width;
 	state->prev_height = state->height;
+}
+
+uint32_t
+wayclient__first_released_buffer_index(wayclient_state *state) {
+	for (uint32_t i = 0; i < WAYCLIENT_BUFFER_COUNT; i ++) {
+		if (!state->buffers[i].attached) {
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 void

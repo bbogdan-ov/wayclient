@@ -35,7 +35,9 @@ typedef struct {
 	bool             attached; // Whether the buffer is being used.
 } wayclient_buffer;
 
-typedef struct {
+typedef struct wayclient_state wayclient_state;
+
+struct wayclient_state {
 	struct wl_display    *wl_display;
 	struct wl_registry   *wl_registry;
 	struct wl_compositor *wl_compositor;
@@ -53,7 +55,12 @@ typedef struct {
 	uint32_t             width, height;
 	uint32_t             prev_width, prev_height;
 	bool                 should_close;
-} wayclient_state;
+
+	// Callbacks.
+	void                 *userdata; // Custom user data that is passed to the callbacks.
+	void                 (*draw)(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size, void *userdata);
+	void                 (*on_resize)(wayclient_state *state, void *userdata);
+};
 
 // ------------------------------
 // Public functions.
@@ -92,14 +99,14 @@ wayclient_set_min_size(wayclient_state *state, uint32_t min_width, uint32_t min_
 bool
 wayclient__draw(wayclient_state *state);
 
+// Update buffers and SHM pool accordingly to the current window size.
+void
+wayclient__update_buffers_size(wayclient_state *state);
+
 // Returns the index of the first buffer that is not used by the compositor.
 // Returns -1 if all buffers are being used.
 uint32_t
 wayclient__first_released_buffer_index(wayclient_state *state);
-
-// Update buffers and SHM pool accordingly to the current window size.
-void
-wayclient__update_buffers_size(wayclient_state *state);
 
 void
 wayclient__destroy_and_unmap_buffers(wayclient_state *state);
