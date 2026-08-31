@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include <wayland-client.h>
-#include "protocols/xdg-shell.h"
+#include "xdg_shell.h"
 
 #ifndef WAYCLIENT_NO_LOG
 #define wayclient_log(msg)       fprintf(stderr, "WAYCLIENT: "msg"\n")
