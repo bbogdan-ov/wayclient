@@ -31,7 +31,8 @@ void draw(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size) {
 		}
 	}
 
-	my->frame += 1;
+	if (state->draw_each_frame)
+		my->frame += 1;
 }
 
 void on_resize(wayclient_state *state) {
@@ -50,6 +51,9 @@ void on_pointer_motion(wayclient_state *state, double x, double y) {
 	my_state *my = state->userdata;
 	my->px = x;
 	my->py = y;
+
+	if (!state->draw_each_frame)
+		wayclient_draw_and_commit(state);
 }
 void on_pointer_scroll(wayclient_state *state, double x, double y) {
 	printf("Pointer scroll %f, %f\n", x, y);
@@ -91,6 +95,23 @@ void on_keyboard_key(
 	xkb_keysym_t keysym,
 	enum wl_keyboard_key_state key_state
 ) {
+	if (keycode == KEY_SPACE && key_state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+		state->draw_each_frame = !state->draw_each_frame;
+		wayclient_draw_and_commit(state);
+
+		if (state->draw_each_frame) {
+			printf("---\n");
+			printf("--- Draw on each frame\n");
+			printf("---\n");
+		} else {
+			printf("---\n");
+			printf("--- Draw on each pointer motion\n");
+			printf("---\n");
+		}
+	}
+
+	///
+
 	const char *state_str;
 	switch (key_state) {
 	case WL_KEYBOARD_KEY_STATE_PRESSED:  state_str = "pressed"; break;
@@ -131,6 +152,7 @@ int main() {
 	wayclient_state state;
 	wayclient_init(&state, 512, 512);
 	state.userdata = &my;
+	state.draw_each_frame = true;
 
 	wayclient_error err = wayclient_run(&state);
 	assert(err == WAYCLIENT_OK);

@@ -384,7 +384,11 @@ wayclient__frame_callback_handle_done(
 	wl_callback_add_listener(wl_callback, &wayclient__frame_callback_listener, state);
 	state->wl_frame_callback = wl_callback;
 
-	wayclient__draw(state);
+	if (state->on_frame != NULL)
+		state->on_frame(state);
+
+	if (state->draw_each_frame)
+		wayclient_draw_and_commit(state);
 }
 
 struct wl_callback_listener wayclient__frame_callback_listener = {
@@ -409,7 +413,7 @@ wayclient__xdg_surface_handle_configure(
 		wayclient__update_buffers_size(state);
 	}
 
-	wayclient__draw(state);
+	wayclient_draw_and_commit(state);
 }
 
 struct xdg_surface_listener wayclient__xdg_surface_listener = {
@@ -498,6 +502,7 @@ wayclient_init(wayclient_state *state, uint32_t width, uint32_t height) {
 	state->width = width;
 	state->height = height;
 	state->resizable = true;
+	state->draw_each_frame = true;
 }
 
 wayclient_error
@@ -580,12 +585,8 @@ wayclient_destroy(wayclient_state *state) {
 	wl_display_disconnect(state->wl_display);
 }
 
-// ------------------------------
-// Internal functions.
-// ------------------------------
-
 bool
-wayclient__draw(wayclient_state *state) {
+wayclient_draw_and_commit(wayclient_state *state) {
 	int buffer_index = wayclient__first_released_buffer_index(state);
 	if (buffer_index < 0) {
 		// Simply commit the currently attached buffer, so compositor thinks
@@ -608,6 +609,10 @@ wayclient__draw(wayclient_state *state) {
 
 	return true;
 }
+
+// ------------------------------
+// Internal functions.
+// ------------------------------
 
 void
 wayclient__update_buffers_size(wayclient_state *state) {

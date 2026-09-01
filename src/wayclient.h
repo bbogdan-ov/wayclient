@@ -64,10 +64,17 @@ struct wayclient_state {
 	uint32_t             prev_width, prev_height;
 	bool                 should_close;
 	bool                 resizable;
+	bool                 draw_each_frame;
 
 	// Callbacks.
 	void *userdata;
 	// Called N times per second (usually 60) by the compositor when the window is displayed.
+	// May be called much less frequently if compositor decides so (for example when window is not visible).
+	void (*on_frame)(wayclient_state *state);
+	// Called everytime `wayclient_draw_and_commit` being called, usually 60
+	// times per second after `on_frame` callback. (see `on_frame`)
+	// You can set `wayclient_state.draw_each_frame` to false and call
+	// `wayclient_draw_and_commit` whenever you want.
 	void (*draw)(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size);
 	void (*on_resize)(wayclient_state *state);
 
@@ -107,15 +114,15 @@ wayclient_run(wayclient_state *state);
 void
 wayclient_destroy(wayclient_state *state);
 
+// Call user draw callback, damage and commit the surface to the compositor.
+// Returns whether the draw call was successfull or cancelled due to all
+// buffers are being used by the compositor.
+bool
+wayclient_draw_and_commit(wayclient_state *state);
+
 // ------------------------------
 // Internal functions.
 // ------------------------------
-
-// Call user draw callback, damage and commit the surface to the compositor.
-// Returns whether the draw call was cancelled due to all buffers are being
-// used by the compositor.
-bool
-wayclient__draw(wayclient_state *state);
 
 // Update buffers and SHM pool accordingly to the current window size.
 void
