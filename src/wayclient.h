@@ -66,7 +66,8 @@ struct wayclient_state {
 	bool                 resizable;
 
 	// Callbacks.
-	void *userdata; // Custom user data that is passed to the callbacks.
+	void *userdata;
+	// Called N times per second (usually 60) by the compositor when the window is displayed.
 	void (*draw)(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size);
 	void (*on_resize)(wayclient_state *state);
 

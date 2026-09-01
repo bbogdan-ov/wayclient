@@ -4,25 +4,34 @@
 
 #include <wayclient.h>
 
+typedef struct {
+	uint32_t frame;
+	double   px, py;
+} my_state;
+
 const char *keycode_to_str(uint32_t keycode);
 
 void draw(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size) {
+	my_state *my = state->userdata;
+
 	uint32_t *pixels = (uint32_t*)pixel_data;
 
-	//           0xAARRGGBB
-	#define RED  0xFFff0000
-	#define BLUE 0xFF0000ff
+	//            0xAARRGGBB
+	#define BLACK 0xFF111111
+	#define WHITE 0xFFeeeeee
 
 	// Draw checkerboard pattern.
 	for (int y = 0; y < state->height; y ++) {
 		for (int x = 0; x < state->width; x ++) {
-			uint32_t color = RED;
-			int xx = x / 128;
-			int yy = y / 128;
-			if ((xx + yy) % 2 == 0) color = BLUE;
+			uint32_t color = BLACK;
+			int xx = (x - (int)my->px + my->frame) / 128;
+			int yy = (y - (int)my->py + my->frame) / 128;
+			if ((xx + yy) % 2 == 0) color = WHITE;
 			pixels[x + y * state->width] = color;
 		}
 	}
+
+	my->frame += 1;
 }
 
 void on_resize(wayclient_state *state) {
@@ -37,6 +46,10 @@ void on_pointer_leave(wayclient_state *state) {
 }
 void on_pointer_motion(wayclient_state *state, double x, double y) {
 	printf("Pointer %f, %f\n", x, y);
+
+	my_state *my = state->userdata;
+	my->px = x;
+	my->py = y;
 }
 void on_pointer_scroll(wayclient_state *state, double x, double y) {
 	printf("Pointer scroll %f, %f\n", x, y);
@@ -113,8 +126,11 @@ void on_keyboard_key(
 }
 
 int main() {
+	my_state my = {0};
+
 	wayclient_state state;
 	wayclient_init(&state, 512, 512);
+	state.userdata = &my;
 
 	wayclient_error err = wayclient_run(&state);
 	assert(err == WAYCLIENT_OK);
