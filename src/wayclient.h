@@ -121,14 +121,6 @@ void
 wayclient_destroy(wayclient_state *state);
 
 // ------------------------------
-// Utils.
-// ------------------------------
-
-// Convert a keycode from "linux/input-event-codes.h" header into a string.
-const char *
-wayclient_keycode_to_str(uint32_t keycode);
-
-// ------------------------------
 // Internal functions.
 // ------------------------------
 
