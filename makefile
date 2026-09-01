@@ -1,4 +1,4 @@
-CFLAGS = -Wall -lwayland-client
+CFLAGS = -Wall -lwayland-client -lxkbcommon
 
 EXAMPLE_CC = gcc $(CFLAGS) -ggdb -Isrc src/*.c
 

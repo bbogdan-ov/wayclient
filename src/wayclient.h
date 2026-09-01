@@ -5,6 +5,8 @@
 
 #include <wayland-client.h>
 #include "xdg_shell.h"
+#include <xkbcommon/xkbcommon.h>
+#include <linux/input-event-codes.h>
 
 #define wayclient_log(msg)       fprintf(stderr, "WAYCLIENT: "msg"\n")
 #define wayclient_logf(fmt, ...) fprintf(stderr, "WAYCLIENT: "fmt"\n", __VA_ARGS__)
@@ -46,6 +48,12 @@ struct wayclient_state {
 	uint8_t              *pool_data;
 	wayclient_buffer     buffers[WAYCLIENT_BUFFER_COUNT];
 
+	struct wl_seat       *wl_seat;
+	struct wl_pointer    *wl_pointer;
+	struct wl_keyboard   *wl_keyboard;
+	struct xkb_context   *xkb_context;
+	struct xkb_state     *xkb_state;
+
 	struct wl_callback   *wl_frame_callback;
 
 	struct xdg_wm_base   *xdg_wm_base;
@@ -58,9 +66,44 @@ struct wayclient_state {
 	bool                 resizable;
 
 	// Callbacks.
-	void                 *userdata; // Custom user data that is passed to the callbacks.
-	void                 (*draw)(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size, void *userdata);
-	void                 (*on_resize)(wayclient_state *state, void *userdata);
+	void *userdata; // Custom user data that is passed to the callbacks.
+	void (*draw)(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size, void *userdata);
+	void (*on_resize)(wayclient_state *state, void *userdata);
+
+	void (*on_pointer_enter)(wayclient_state *state, void *userdata);
+	void (*on_pointer_leave)(wayclient_state *state, void *userdata);
+	void (*on_pointer_motion)(
+		wayclient_state *state,
+		double x,
+		double y,
+		void *userdata
+	);
+	// `button` is a button code defined in the "linux/input-event-codes.h" header. (e.g. `BTN_LEFT`)
+	void (*on_pointer_button)(
+		wayclient_state *state,
+		uint32_t button,
+		enum wl_pointer_button_state button_state,
+		void *userdata
+	);
+	void (*on_pointer_scroll)(
+		wayclient_state *state,
+		double x,
+		double y,
+		void *userdata
+	);
+
+	// Keyboard focuses the window.
+	void (*on_keyboard_enter)(wayclient_state *state, void *userdata);
+	// Keyboard unfocuses the window.
+	void (*on_keyboard_leave)(wayclient_state *state, void *userdata);
+	// `keycode` is a keycode defined in the "linux/input-event-codes.h" header. (e.g. `KEY_Q`)
+	void (*on_keyboard_key)(
+		wayclient_state *state,
+		uint32_t keycode,
+		xkb_keysym_t keysym,
+		enum wl_keyboard_key_state key_state,
+		void *userdata
+	);
 };
 
 // ------------------------------
@@ -76,6 +119,14 @@ wayclient_run(wayclient_state *state);
 // Clean up the memory and disconnect from the Wayland display.
 void
 wayclient_destroy(wayclient_state *state);
+
+// ------------------------------
+// Utils.
+// ------------------------------
+
+// Convert a keycode from "linux/input-event-codes.h" header into a string.
+const char *
+wayclient_keycode_to_str(uint32_t keycode);
 
 // ------------------------------
 // Internal functions.
