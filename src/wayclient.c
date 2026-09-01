@@ -567,6 +567,8 @@ wayclient_destroy(wayclient_state *state) {
 	if (state->xdg_surface != NULL)  xdg_surface_destroy(state->xdg_surface);
 	if (state->xdg_wm_base != NULL)  xdg_wm_base_destroy(state->xdg_wm_base);
 
+	if (state->xkb_context != NULL) xkb_context_unref(state->xkb_context);
+	if (state->xkb_state != NULL)   xkb_state_unref(state->xkb_state);
 	if (state->wl_pointer != NULL)  wl_pointer_release(state->wl_pointer);
 	if (state->wl_keyboard != NULL) wl_keyboard_release(state->wl_keyboard);
 	if (state->wl_seat != NULL)     wl_seat_destroy(state->wl_seat);
