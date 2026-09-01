@@ -78,8 +78,10 @@ struct wayclient_state {
 	void (*on_pointer_scroll)(wayclient_state *state, double x, double y);
 
 	// Keyboard focuses the window.
+	// I think it is similar to when user focuses the window?
 	void (*on_keyboard_enter)(wayclient_state *state);
 	// Keyboard unfocuses the window.
+	// I think it is similar to when user unfocuses the window?
 	void (*on_keyboard_leave)(wayclient_state *state);
 	// `keycode` is a keycode defined in the "linux/input-event-codes.h" header. (e.g. `KEY_Q`)
 	void (*on_keyboard_key)(
