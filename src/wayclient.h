@@ -67,42 +67,26 @@ struct wayclient_state {
 
 	// Callbacks.
 	void *userdata; // Custom user data that is passed to the callbacks.
-	void (*draw)(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size, void *userdata);
-	void (*on_resize)(wayclient_state *state, void *userdata);
+	void (*draw)(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size);
+	void (*on_resize)(wayclient_state *state);
 
-	void (*on_pointer_enter)(wayclient_state *state, void *userdata);
-	void (*on_pointer_leave)(wayclient_state *state, void *userdata);
-	void (*on_pointer_motion)(
-		wayclient_state *state,
-		double x,
-		double y,
-		void *userdata
-	);
+	void (*on_pointer_enter)(wayclient_state *state);
+	void (*on_pointer_leave)(wayclient_state *state);
+	void (*on_pointer_motion)(wayclient_state *state, double x, double y);
 	// `button` is a button code defined in the "linux/input-event-codes.h" header. (e.g. `BTN_LEFT`)
-	void (*on_pointer_button)(
-		wayclient_state *state,
-		uint32_t button,
-		enum wl_pointer_button_state button_state,
-		void *userdata
-	);
-	void (*on_pointer_scroll)(
-		wayclient_state *state,
-		double x,
-		double y,
-		void *userdata
-	);
+	void (*on_pointer_button)(wayclient_state *state, uint32_t button, enum wl_pointer_button_state button_state);
+	void (*on_pointer_scroll)(wayclient_state *state, double x, double y);
 
 	// Keyboard focuses the window.
-	void (*on_keyboard_enter)(wayclient_state *state, void *userdata);
+	void (*on_keyboard_enter)(wayclient_state *state);
 	// Keyboard unfocuses the window.
-	void (*on_keyboard_leave)(wayclient_state *state, void *userdata);
+	void (*on_keyboard_leave)(wayclient_state *state);
 	// `keycode` is a keycode defined in the "linux/input-event-codes.h" header. (e.g. `KEY_Q`)
 	void (*on_keyboard_key)(
 		wayclient_state *state,
 		uint32_t keycode,
 		xkb_keysym_t keysym,
-		enum wl_keyboard_key_state key_state,
-		void *userdata
+		enum wl_keyboard_key_state key_state
 	);
 };
 

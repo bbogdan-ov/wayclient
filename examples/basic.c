@@ -6,12 +6,7 @@
 
 const char *keycode_to_str(uint32_t keycode);
 
-void draw(
-	wayclient_state *state,
-	uint8_t *pixel_data,
-	size_t pixel_data_size,
-	void *userdata
-) {
+void draw(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size) {
 	uint32_t *pixels = (uint32_t*)pixel_data;
 
 	//           0xAARRGGBB
@@ -30,28 +25,23 @@ void draw(
 	}
 }
 
-void on_resize(wayclient_state *state, void *userdata) {
+void on_resize(wayclient_state *state) {
 	printf("Resized %dx%d\n", state->width, state->height);
 }
 
-void on_pointer_enter(wayclient_state *state, void *userdata) {
+void on_pointer_enter(wayclient_state *state) {
 	printf("Pointer enter\n");
 }
-void on_pointer_leave(wayclient_state *state, void *userdata) {
+void on_pointer_leave(wayclient_state *state) {
 	printf("Pointer leave\n");
 }
-void on_pointer_motion(wayclient_state *state, double x, double y, void *userdata) {
+void on_pointer_motion(wayclient_state *state, double x, double y) {
 	printf("Pointer %f, %f\n", x, y);
 }
-void on_pointer_scroll(wayclient_state *state, double x, double y, void *userdata) {
+void on_pointer_scroll(wayclient_state *state, double x, double y) {
 	printf("Pointer scroll %f, %f\n", x, y);
 }
-void on_pointer_button(
-	wayclient_state *state,
-	uint32_t button,
-	enum wl_pointer_button_state button_state,
-	void *userdata
-) {
+void on_pointer_button(wayclient_state *state, uint32_t button, enum wl_pointer_button_state button_state) {
 	const char *button_str;
 	const char *state_str;
 
@@ -76,18 +66,17 @@ void on_pointer_button(
 	printf("Pointer button: %s, state = %s\n", button_str, state_str);
 }
 
-void on_keyboard_enter(wayclient_state *state, void *userdata) {
+void on_keyboard_enter(wayclient_state *state) {
 	printf("keyboard enter\n");
 }
-void on_keyboard_leave(wayclient_state *state, void *userdata) {
+void on_keyboard_leave(wayclient_state *state) {
 	printf("Keyboard leave\n");
 }
 void on_keyboard_key(
 	wayclient_state *state,
 	uint32_t keycode,
 	xkb_keysym_t keysym,
-	enum wl_keyboard_key_state key_state,
-	void *userdata
+	enum wl_keyboard_key_state key_state
 ) {
 	const char *state_str;
 	switch (key_state) {

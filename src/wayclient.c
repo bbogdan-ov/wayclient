@@ -99,7 +99,7 @@ wayclient__wl_pointer_handle_enter(
 ) {
 	wayclient_state *state = data;
 	if (state->on_pointer_enter != NULL)
-		state->on_pointer_enter(state, state->userdata);
+		state->on_pointer_enter(state);
 }
 
 static void
@@ -111,7 +111,7 @@ wayclient__wl_pointer_handle_leave(
 ) {
 	wayclient_state *state = data;
 	if (state->on_pointer_leave != NULL)
-		state->on_pointer_leave(state, state->userdata);
+		state->on_pointer_leave(state);
 }
 
 static void
@@ -124,12 +124,7 @@ wayclient__wl_pointer_handle_motion(
 ) {
 	wayclient_state *state = data;
 	if (state->on_pointer_motion != NULL)
-		state->on_pointer_motion(
-			state,
-			wl_fixed_to_double(surface_x),
-			wl_fixed_to_double(surface_y),
-			state->userdata
-		);
+		state->on_pointer_motion(state, wl_fixed_to_double(surface_x), wl_fixed_to_double(surface_y));
 }
 
 static void
@@ -143,12 +138,7 @@ wayclient__wl_pointer_handle_button(
 ) {
 	wayclient_state *state = data;
 	if (state->on_pointer_button != NULL)
-		state->on_pointer_button(
-			state,
-			button,
-			button_state,
-			state->userdata
-		);
+		state->on_pointer_button(state, button, button_state);
 }
 
 static void
@@ -170,7 +160,7 @@ wayclient__wl_pointer_handle_axis(
 	else if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL)
 		y = wl_fixed_to_double(value);
 
-	state->on_pointer_scroll(state, x, y, state->userdata);
+	state->on_pointer_scroll(state, x, y);
 }
 
 static void
@@ -279,7 +269,7 @@ wayclient__wl_keyboard_handle_enter(
 ) {
 	wayclient_state *state = data;
 	if (state->on_keyboard_enter != NULL)
-		state->on_keyboard_enter(state, state->userdata);
+		state->on_keyboard_enter(state);
 }
 
 static void
@@ -291,7 +281,7 @@ wayclient__wl_keyboard_handle_leave(
 ) {
 	wayclient_state *state = data;
 	if (state->on_keyboard_leave != NULL)
-		state->on_keyboard_leave(state, state->userdata);
+		state->on_keyboard_leave(state);
 }
 
 static void
@@ -309,7 +299,7 @@ wayclient__wl_keyboard_handle_key(
 	// "...clients must add 8 to the key event keycode" for xkb keymap format.
 	xkb_keysym_t keysym = xkb_state_key_get_one_sym(state->xkb_state, key + 8);
 
-	state->on_keyboard_key(state, key, keysym, key_state, state->userdata);
+	state->on_keyboard_key(state, key, keysym, key_state);
 }
 
 static void
@@ -604,12 +594,10 @@ wayclient__draw(wayclient_state *state) {
 
 	wayclient_buffer *buffer = &state->buffers[buffer_index];
 
-	if (state->draw != NULL) state->draw(
-		state,
-		buffer->data,
-		state->width * state->height * WAYCLIENT_PIXEL_SIZE,
-		state->userdata
-	);
+	if (state->draw != NULL) {
+		size_t data_size = state->width * state->height * WAYCLIENT_PIXEL_SIZE;
+		state->draw(state, buffer->data, data_size);
+	}
 
 	buffer->attached = true;
 	wl_surface_attach(state->wl_surface, buffer->wl_buffer, 0, 0);
@@ -663,7 +651,7 @@ wayclient__update_buffers_size(wayclient_state *state) {
 	wl_shm_pool_destroy(wl_pool);
 	close(fd);
 
-	if (state->on_resize != NULL) state->on_resize(state, state->userdata);
+	if (state->on_resize != NULL) state->on_resize(state);
 
 	state->prev_width = state->width;
 	state->prev_height = state->height;
