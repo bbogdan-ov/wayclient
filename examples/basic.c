@@ -7,12 +7,12 @@
 typedef struct {
 	uint32_t frame;
 	double   px, py;
-} my_state;
+} My_State;
 
 const char *keycode_to_str(uint32_t keycode);
 
-void draw(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size) {
-	my_state *my = state->userdata;
+void draw(Wayclient_State *state, uint8_t *pixel_data, size_t pixel_data_size) {
+	My_State *my = state->userdata;
 
 	uint32_t *pixels = (uint32_t*)pixel_data;
 
@@ -35,30 +35,30 @@ void draw(wayclient_state *state, uint8_t *pixel_data, size_t pixel_data_size) {
 		my->frame += 1;
 }
 
-void on_resize(wayclient_state *state) {
+void on_resize(Wayclient_State *state) {
 	printf("Resized %dx%d\n", state->width, state->height);
 }
 
-void on_pointer_enter(wayclient_state *state) {
+void on_pointer_enter(Wayclient_State *state) {
 	printf("Pointer enter\n");
 }
-void on_pointer_leave(wayclient_state *state) {
+void on_pointer_leave(Wayclient_State *state) {
 	printf("Pointer leave\n");
 }
-void on_pointer_motion(wayclient_state *state, double x, double y) {
+void on_pointer_motion(Wayclient_State *state, double x, double y) {
 	printf("Pointer %f, %f\n", x, y);
 
-	my_state *my = state->userdata;
+	My_State *my = state->userdata;
 	my->px = x;
 	my->py = y;
 
 	if (!state->draw_each_frame)
 		wayclient_draw_and_commit(state);
 }
-void on_pointer_scroll(wayclient_state *state, double x, double y) {
+void on_pointer_scroll(Wayclient_State *state, double x, double y) {
 	printf("Pointer scroll %f, %f\n", x, y);
 }
-void on_pointer_button(wayclient_state *state, uint32_t button, enum wl_pointer_button_state button_state) {
+void on_pointer_button(Wayclient_State *state, uint32_t button, enum wl_pointer_button_state button_state) {
 	const char *button_str;
 	const char *state_str;
 
@@ -83,14 +83,14 @@ void on_pointer_button(wayclient_state *state, uint32_t button, enum wl_pointer_
 	printf("Pointer button: %s, state = %s\n", button_str, state_str);
 }
 
-void on_keyboard_enter(wayclient_state *state) {
+void on_keyboard_enter(Wayclient_State *state) {
 	printf("keyboard enter\n");
 }
-void on_keyboard_leave(wayclient_state *state) {
+void on_keyboard_leave(Wayclient_State *state) {
 	printf("Keyboard leave\n");
 }
 void on_keyboard_key(
-	wayclient_state *state,
+	Wayclient_State *state,
 	uint32_t keycode,
 	xkb_keysym_t keysym,
 	enum wl_keyboard_key_state key_state
@@ -147,14 +147,14 @@ void on_keyboard_key(
 }
 
 int main() {
-	my_state my = {0};
+	My_State my = {0};
 
-	wayclient_state state;
+	Wayclient_State state;
 	wayclient_init(&state, 512, 512);
 	state.userdata = &my;
 	state.draw_each_frame = true;
 
-	wayclient_error err = wayclient_run(&state);
+	Wayclient_Error err = wayclient_run(&state);
 	assert(err == WAYCLIENT_OK);
 
 	state.draw = draw;

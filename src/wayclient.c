@@ -22,7 +22,7 @@ wayclient__registry_handle_global(
 	const char *interface,
 	uint32_t version
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 
 	#define BIND(field, iface) \
 		if (strcmp(interface, iface.name) == 0) { \
@@ -60,7 +60,7 @@ wayclient__wl_seat_handle_capabilities(
 	struct wl_seat *wl_seat,
 	uint32_t capabilities
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 
 	if ((capabilities & WL_SEAT_CAPABILITY_POINTER) != 0 && state->wl_pointer == NULL) {
 		state->wl_pointer = wl_seat_get_pointer(wl_seat);
@@ -97,7 +97,7 @@ wayclient__wl_pointer_handle_enter(
 	wl_fixed_t surface_x,
 	wl_fixed_t surface_y
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (state->on_pointer_enter != NULL)
 		state->on_pointer_enter(state);
 }
@@ -109,7 +109,7 @@ wayclient__wl_pointer_handle_leave(
 	uint32_t serial,
 	struct wl_surface *surface
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (state->on_pointer_leave != NULL)
 		state->on_pointer_leave(state);
 }
@@ -122,7 +122,7 @@ wayclient__wl_pointer_handle_motion(
 	wl_fixed_t surface_x,
 	wl_fixed_t surface_y
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (state->on_pointer_motion != NULL)
 		state->on_pointer_motion(state, wl_fixed_to_double(surface_x), wl_fixed_to_double(surface_y));
 }
@@ -136,7 +136,7 @@ wayclient__wl_pointer_handle_button(
 	uint32_t button,
 	uint32_t button_state
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (state->on_pointer_button != NULL)
 		state->on_pointer_button(state, button, button_state);
 }
@@ -149,7 +149,7 @@ wayclient__wl_pointer_handle_axis(
 	uint32_t axis,
 	wl_fixed_t value
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (state->on_pointer_scroll == NULL) return;
 
 	double x = 0.0;
@@ -236,7 +236,7 @@ wayclient__wl_keyboard_handle_keymap(
 	int32_t fd,
 	uint32_t size
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 
 	assert(format == WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1); // TODO: handle unsupported format.
 
@@ -267,7 +267,7 @@ wayclient__wl_keyboard_handle_enter(
 	struct wl_surface *surface,
 	struct wl_array *keys
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (state->on_keyboard_enter != NULL)
 		state->on_keyboard_enter(state);
 }
@@ -279,7 +279,7 @@ wayclient__wl_keyboard_handle_leave(
 	uint32_t serial,
 	struct wl_surface *surface
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (state->on_keyboard_leave != NULL)
 		state->on_keyboard_leave(state);
 }
@@ -293,7 +293,7 @@ wayclient__wl_keyboard_handle_key(
 	uint32_t key,
 	uint32_t key_state
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (state->on_keyboard_key == NULL) return;
 
 	// "...clients must add 8 to the key event keycode" for xkb keymap format.
@@ -312,7 +312,7 @@ wayclient__wl_keyboard_handle_modifiers(
 	uint32_t mods_locked,
 	uint32_t group
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 
 	xkb_state_update_mask(
 		state->xkb_state,
@@ -332,7 +332,7 @@ wayclient__wl_keyboard_handle_repeat_info(
 	int32_t rate,
 	int32_t delay
 ) {
-	// wayclient_state *state = data;
+	// Wayclient_State *state = data;
 
 	// TODO!!: implement key press repeation.
 	// For now repeated keypress (after you hold on a key and wait a little
@@ -377,7 +377,7 @@ wayclient__frame_callback_handle_done(
 	struct wl_callback *wl_callback,
 	uint32_t callback_data
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 
 	wl_callback_destroy(wl_callback);
 	wl_callback = wl_surface_frame(state->wl_surface);
@@ -405,7 +405,7 @@ wayclient__xdg_surface_handle_configure(
 	struct xdg_surface *xdg_surface,
 	uint32_t serial
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 
 	xdg_surface_ack_configure(xdg_surface, serial);
 
@@ -432,7 +432,7 @@ wayclient__xdg_toplevel_handle_configure(
 	int32_t height,
 	struct wl_array *states
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	if (!state->resizable) return;
 	if (width != state->width || height != state->height) {
 		state->width = width;
@@ -446,7 +446,7 @@ wayclient__xdg_toplevel_handle_close(
 	void *data,
 	struct xdg_toplevel *xdg_toplevel
 ) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 	state->should_close = true;
 }
 
@@ -478,7 +478,7 @@ struct xdg_toplevel_listener wayclient__xdg_toplevel_listener = {
 
 static void
 wayclient__wl_buffer_handle_release(void *data, struct wl_buffer *wl_buffer) {
-	wayclient_state *state = data;
+	Wayclient_State *state = data;
 
 	for (int i = 0; i < WAYCLIENT_BUFFER_COUNT; i ++) {
 		if (state->buffers[i].wl_buffer == wl_buffer) {
@@ -497,16 +497,16 @@ struct wl_buffer_listener wayclient__wl_buffer_listener = {
 // ------------------------------
 
 void
-wayclient_init(wayclient_state *state, uint32_t width, uint32_t height) {
-	memset(state, 0, sizeof(wayclient_state));
+wayclient_init(Wayclient_State *state, uint32_t width, uint32_t height) {
+	memset(state, 0, sizeof(Wayclient_State));
 	state->width = width;
 	state->height = height;
 	state->resizable = true;
 	state->draw_each_frame = true;
 }
 
-wayclient_error
-wayclient_run(wayclient_state *state) {
+Wayclient_Error
+wayclient_run(Wayclient_State *state) {
 	state->wl_display = wl_display_connect(NULL);
 	if (state->wl_display == NULL) {
 		return WAYCLIENT_ERR_CONNECT;
@@ -561,7 +561,7 @@ wayclient_run(wayclient_state *state) {
 }
 
 void
-wayclient_destroy(wayclient_state *state) {
+wayclient_destroy(Wayclient_State *state) {
 	state->prev_width = state->width;
 	state->prev_height = state->height;
 	wayclient__destroy_and_unmap_buffers(state);
@@ -586,7 +586,7 @@ wayclient_destroy(wayclient_state *state) {
 }
 
 bool
-wayclient_draw_and_commit(wayclient_state *state) {
+wayclient_draw_and_commit(Wayclient_State *state) {
 	int buffer_index = wayclient__first_released_buffer_index(state);
 	if (buffer_index < 0) {
 		// Simply commit the currently attached buffer, so compositor thinks
@@ -595,7 +595,7 @@ wayclient_draw_and_commit(wayclient_state *state) {
 		return false;
 	}
 
-	wayclient_buffer *buffer = &state->buffers[buffer_index];
+	Wayclient_Buffer *buffer = &state->buffers[buffer_index];
 
 	if (state->draw != NULL) {
 		size_t data_size = state->width * state->height * WAYCLIENT_PIXEL_SIZE;
@@ -615,7 +615,7 @@ wayclient_draw_and_commit(wayclient_state *state) {
 // ------------------------------
 
 void
-wayclient__update_buffers_size(wayclient_state *state) {
+wayclient__update_buffers_size(Wayclient_State *state) {
 	if (state->width < 1) state->width = 1;
 	if (state->height < 1) state->height = 1;
 	if (state->prev_width == state->width && state->prev_height == state->height) return;
@@ -636,8 +636,8 @@ wayclient__update_buffers_size(wayclient_state *state) {
 	assert(wl_pool != NULL); // TODO: handle error.
 
 	for (int i = 0; i < WAYCLIENT_BUFFER_COUNT; i ++) {
-		wayclient_buffer *buffer = &state->buffers[i];
-		*buffer = (wayclient_buffer){0};
+		Wayclient_Buffer *buffer = &state->buffers[i];
+		*buffer = (Wayclient_Buffer){0};
 
 		int offset = size * i;
 		buffer->wl_buffer = wl_shm_pool_create_buffer(
@@ -665,7 +665,7 @@ wayclient__update_buffers_size(wayclient_state *state) {
 }
 
 uint32_t
-wayclient__first_released_buffer_index(wayclient_state *state) {
+wayclient__first_released_buffer_index(Wayclient_State *state) {
 	for (uint32_t i = 0; i < WAYCLIENT_BUFFER_COUNT; i ++) {
 		if (!state->buffers[i].attached) {
 			return i;
@@ -676,9 +676,9 @@ wayclient__first_released_buffer_index(wayclient_state *state) {
 }
 
 void
-wayclient__destroy_and_unmap_buffers(wayclient_state *state) {
+wayclient__destroy_and_unmap_buffers(Wayclient_State *state) {
 	for (int i = 0; i < WAYCLIENT_BUFFER_COUNT; i ++) {
-		wayclient_buffer *buffer = &state->buffers[i];
+		Wayclient_Buffer *buffer = &state->buffers[i];
 		if (buffer->wl_buffer == NULL) continue;
 
 		wl_buffer_destroy(buffer->wl_buffer);
