@@ -122,10 +122,10 @@ void on_keyboard_key(
 
 	// I would describe the difference between `keycode` and `keysym` as:
 	// - Keysym depends on the current layout and currently pressed modifiers
-	//   (shift, capslock, etc) and used to determine the actual that is being
-	//   pressed (to use for a text field in your app for example).
-	// - Keycode is layout and state agnostic. Pressing 'Ц' with russian
-	//   layout (on a classic QUERTY keyboard) will always result in KEY_W.
+	//   (shift, capslock, etc) and used to determine the actual char that is
+	//   being pressed (to use it for a text field in your app for example).
+	// - Keycode is layout and state agnostic. Pressing, for example, 'Ц' with
+	//   russian layout (on a classic QUERTY keyboard) will always result in KEY_W.
 
 	char name_buf[64];
 	int name_len = xkb_keysym_get_name(keysym, name_buf, sizeof(name_buf));
