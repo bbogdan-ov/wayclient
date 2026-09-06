@@ -1,6 +1,7 @@
 #include "wayclient.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
@@ -243,12 +244,17 @@ wayclient__wl_keyboard_handle_keymap(
 ) {
 	Wayclient_State *state = data;
 
-	assert(format == WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1); // TODO: handle unsupported format.
-
-	wayclient_logf("Keymap: format = %d, fd = %d, size = %d", format, fd, size);
+	if (format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
+		// NOTE: currently only XKB_V1 and NO_KEYMAP are in the Wayland protocol.
+		wayclient_log("ERROR: Received unsupported keymap format (no_keymap), only XKB v1 is supported");
+		return;
+	}
 
 	char *keymap_str = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
-	assert(keymap_str != MAP_FAILED); // TODO: handle error.
+	if (keymap_str == NULL) {
+		wayclient_logf("ERROR: Failed to `mmap` keymap description: %s, fd = %d, size = %d", strerror(errno), fd, size);
+		return;
+	}
 
 	struct xkb_keymap *keymap = xkb_keymap_new_from_buffer(
 		state->xkb_context,
@@ -534,12 +540,17 @@ wayclient_run(Wayclient_State *state) {
 		wl_seat_add_listener(state->wl_seat, &wayclient__wl_seat_listener, state);
 		wl_display_roundtrip(state->wl_display); // Wait untill we get all devices (pointer, keyboard, etc).
 
-		if (state->wl_pointer != NULL)
+		if (state->wl_pointer != NULL) {
 			wl_pointer_add_listener(state->wl_pointer, &wayclient__wl_pointer_listener, state);
+		} else {
+			wayclient_log("Pointer is not available");
+		}
 
 		if (state->wl_keyboard != NULL) {
 			state->xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
 			wl_keyboard_add_listener(state->wl_keyboard, &wayclient__wl_keyboard_listener, state);
+		} else {
+			wayclient_log("Keyboard is not available");
 		}
 	}
 
@@ -632,13 +643,22 @@ wayclient__update_buffers_size(Wayclient_State *state) {
 	int pool_size = size * WAYCLIENT_BUFFER_COUNT;
 
 	int fd = wayclient__create_shm_file(pool_size);
-	assert(fd >= 0); // TODO: handle error.
+	if (fd < 0) {
+		wayclient_logf("FATAL ERROR: Failed to create SHM file: %s", strerror(errno));
+		abort();
+	}
 
 	state->pool_data = mmap(NULL, pool_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	assert(state->pool_data != MAP_FAILED); // TODO: handle error.
+	if (state->pool_data == NULL) {
+		wayclient_logf("FATAL ERROR: Failed to `mmap` SHM pool data: %s, fd = %d, size = %d", strerror(errno), fd, size);
+		abort();
+	}
 
 	struct wl_shm_pool *wl_pool = wl_shm_create_pool(state->wl_shm, fd, pool_size);
-	assert(wl_pool != NULL); // TODO: handle error.
+	if (wl_pool == NULL) {
+		wayclient_log("FATAL ERROR: Failed to SHM pool");
+		abort();
+	}
 
 	for (int i = 0; i < WAYCLIENT_BUFFER_COUNT; i ++) {
 		Wayclient_Buffer *buffer = &state->buffers[i];
@@ -653,7 +673,10 @@ wayclient__update_buffers_size(Wayclient_State *state) {
 			stride,
 			WAYCLIENT_PIXEL_FORMAT
 		);
-		assert(buffer->wl_buffer != NULL); // TODO: handle error.
+		if (buffer->wl_buffer == NULL) {
+			wayclient_log("FATAL ERROR: Failed to create pool buffer");
+			abort();
+		}
 
 		buffer->data = state->pool_data + offset;
 
