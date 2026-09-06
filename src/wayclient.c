@@ -10,6 +10,11 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
+// FIXME!: for some reason `-fsanitize=address` (even with odin's sanitizer)
+// produces constant memory leaks (~1mb per second), but the sanitizer doesn't
+// catch them?.. I think i'm doing something wrong, but i have absolutely no
+// idea what. It doesn't leak any memory without the sanitizer enabled tho.
+
 // ------------------------------
 // WL registry listener.
 // ------------------------------
