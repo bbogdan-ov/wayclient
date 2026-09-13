@@ -166,7 +166,7 @@ wayclient__wl_pointer_handle_axis(
 	else if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL)
 		y = wl_fixed_to_double(value);
 
-	state->on_pointer_scroll(state, x, y);
+	state->on_pointer_scroll(state, x, y, state->scroll_source);
 }
 
 static void
@@ -181,7 +181,8 @@ wayclient__wl_pointer_handle_axis_source(
 	struct wl_pointer *wl_pointer,
 	uint32_t axis_source
 ) {
-	// TODO: should probably store "scroll source" in the state.
+	Wayclient_State *state = data;
+	state->scroll_source = axis_source;
 }
 
 static void

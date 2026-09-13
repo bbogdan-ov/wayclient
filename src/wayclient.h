@@ -60,6 +60,8 @@ struct Wayclient_State {
 	struct xdg_surface   *xdg_surface;
 	struct xdg_toplevel  *xdg_toplevel;
 
+	enum wl_pointer_axis_source scroll_source;
+
 	uint32_t             width, height;
 	uint32_t             prev_width, prev_height;
 	bool                 should_close;
@@ -83,7 +85,7 @@ struct Wayclient_State {
 	void (*on_pointer_motion)(Wayclient_State *state, double x, double y);
 	// `button` is a button code defined in the "linux/input-event-codes.h" header. (e.g. `BTN_LEFT`)
 	void (*on_pointer_button)(Wayclient_State *state, uint32_t button, enum wl_pointer_button_state button_state);
-	void (*on_pointer_scroll)(Wayclient_State *state, double x, double y);
+	void (*on_pointer_scroll)(Wayclient_State *state, double x, double y, enum wl_pointer_axis_source source);
 
 	// Keyboard focuses the window.
 	// I think it is similar to when user focuses the window?

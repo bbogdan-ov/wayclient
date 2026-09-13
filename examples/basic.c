@@ -46,7 +46,7 @@ void on_pointer_leave(Wayclient_State *state) {
 	printf("Pointer leave\n");
 }
 void on_pointer_motion(Wayclient_State *state, double x, double y) {
-	printf("Pointer %f, %f\n", x, y);
+	printf("Pointer motion: %f, %f\n", x, y);
 
 	My_State *my = state->userdata;
 	my->px = x;
@@ -55,8 +55,16 @@ void on_pointer_motion(Wayclient_State *state, double x, double y) {
 	if (!state->draw_each_frame)
 		wayclient_draw_and_commit(state);
 }
-void on_pointer_scroll(Wayclient_State *state, double x, double y) {
-	printf("Pointer scroll %f, %f\n", x, y);
+void on_pointer_scroll(Wayclient_State *state, double x, double y, enum wl_pointer_axis_source source) {
+	const char *source_str;
+	switch (source) {
+	case WL_POINTER_AXIS_SOURCE_WHEEL:      source_str = "wheel"; break;
+	case WL_POINTER_AXIS_SOURCE_FINGER:     source_str = "finger"; break;
+	case WL_POINTER_AXIS_SOURCE_CONTINUOUS: source_str = "continuous"; break;
+	case WL_POINTER_AXIS_SOURCE_WHEEL_TILT: source_str = "WHEEL_TILT"; break;
+	}
+
+	printf("Pointer scroll: %f, %f, source = %s\n", x, y, source_str);
 }
 void on_pointer_button(Wayclient_State *state, uint32_t button, enum wl_pointer_button_state button_state) {
 	const char *button_str;
