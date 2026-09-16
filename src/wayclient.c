@@ -117,7 +117,6 @@ wayclient__wl_pointer_handle_enter(
 		wayclient_set_cursor(state, state->cursor);
 	}
 
-	wayclient_logf("Pointer enter: serial = %d", serial);
 	if (state->on_pointer_enter != NULL)
 		state->on_pointer_enter(state);
 }
