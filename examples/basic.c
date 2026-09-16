@@ -118,6 +118,31 @@ void on_keyboard_key(
 		}
 	}
 
+	// Setting cursor by pressing on numbers.
+	if (key_state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+		if (keycode == KEY_1) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
+		} else if (keycode == KEY_2) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_POINTER);
+		} else if (keycode == KEY_3) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_PROGRESS);
+		} else if (keycode == KEY_4) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_WAIT);
+		} else if (keycode == KEY_5) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_CROSSHAIR);
+		} else if (keycode == KEY_6) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_TEXT);
+		} else if (keycode == KEY_7) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_ALL_RESIZE);
+		} else if (keycode == KEY_8) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_GRAB);
+		} else if (keycode == KEY_9) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_GRABBING);
+		} else if (keycode == KEY_0) {
+			wayclient_set_cursor(state, WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_ZOOM_IN);
+		}
+	}
+
 	///
 
 	const char *state_str;

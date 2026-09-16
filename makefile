@@ -13,7 +13,9 @@ build/libwayclient.a: src/*.c src/*.h
 # Generate protocols code.
 protocols:
 	wayland-scanner client-header protocols/xdg_shell.xml src/xdg_shell.h
-	wayland-scanner private-code protocols/xdg_shell.xml src/xdg_shell.c
+	wayland-scanner private-code  protocols/xdg_shell.xml src/xdg_shell.c
+	wayland-scanner client-header protocols/cursor_shape_v1_modified.xml src/cursor_shape_v1.h
+	wayland-scanner private-code  protocols/cursor_shape_v1_modified.xml src/cursor_shape_v1.c
 
 # Compile examples.
 examples:

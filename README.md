@@ -13,6 +13,12 @@ There is still a lot of things to do, but you already can draw something and han
 
 Have fun!
 
+## Implemented protocols
+
+- [`wayland.xml`](https://wayland.app/protocols/wayland)
+- [`xdg-shell.xml`](https://wayland.app/protocols/xdg-shell)
+- [`cursor-shape-v1.xml`](https://wayland.app/protocols/cursor-shape-v1), [`zwp_tablet`](https://wayland.app/protocols/tablet-v2) removed from dependencies
+
 ## Building
 
 **Dependencies**:
@@ -28,6 +34,7 @@ make
 #   ./build/libwayclient.a
 #   ./src/wayclient.h
 #   ./src/xdg_shell.h
+#   ./src/cursor_shape_v1.h
 ```
 
 **Building examples:**
