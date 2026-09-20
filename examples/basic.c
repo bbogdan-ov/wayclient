@@ -153,6 +153,19 @@ void on_keyboard_key(
 	default:                             state_str = "unknown"; break;
 	}
 
+	const char *shift_mod_str = "";
+	const char *ctrl_mod_str = "";
+	const char *alt_mod_str = "";
+	if ((state->pressed_mods_mask & state->shift_mask) != 0) {
+		shift_mod_str = "shift";
+	}
+	if ((state->pressed_mods_mask & state->ctrl_mask) != 0) {
+		ctrl_mod_str = "ctrl";
+	}
+	if ((state->pressed_mods_mask & state->alt_mask) != 0) {
+		alt_mod_str = "alt";
+	}
+
 	// I would describe the difference between `keycode` and `keysym` as:
 	// - Keysym depends on the current layout and currently pressed modifiers
 	//   (shift, capslock, etc) and used to determine the actual char that is
@@ -170,12 +183,17 @@ void on_keyboard_key(
 
 	const char *key_str = keycode_to_str(keycode);
 
+	// NOTE: `utf8_char` is unescaped so it may break your terminal output if
+	// you type something weird :)
 	printf(
-		"Keyboard key: %s, keysym = %.*s, utf8_char = %.*s, state = %s\n",
+		"Keyboard key: %s, keysym = %.*s, utf8_char = %.*s, state = %s, mods = [%s,%s,%s]\n",
 		key_str,
 		name_len, name_buf,
 		char_len, char_buf,
-		state_str
+		state_str,
+		shift_mod_str,
+		ctrl_mod_str,
+		alt_mod_str
 	);
 }
 
