@@ -1,15 +1,32 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <time.h>
 
 #include <wayclient.h>
 
 typedef struct {
-	uint32_t frame;
-	double   px, py;
+	uint32_t        frame;
+	double          px, py;
+	struct timespec prev_frame_time;
 } My_State;
 
 const char *keycode_to_str(uint32_t keycode);
+
+uint32_t ms_diff(struct timespec from, struct timespec to) {
+	return (to.tv_sec - from.tv_sec) * 1000 + (to.tv_nsec - from.tv_nsec) / 1000000;
+}
+
+void on_frame(Wayclient_State *state) {
+	My_State *my = state->userdata;
+
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	uint32_t elapsed_ms = ms_diff(my->prev_frame_time, now);
+	my->prev_frame_time = now;
+
+	wayclient_update_key_repetition(state, elapsed_ms);
+}
 
 void draw(Wayclient_State *state, uint8_t *pixel_data, size_t pixel_data_size) {
 	My_State *my = state->userdata;
@@ -209,6 +226,7 @@ int main() {
 	assert(err == WAYCLIENT_OK);
 
 	state.draw = draw;
+	state.on_frame = on_frame;
 	state.on_resize = on_resize;
 	state.on_pointer_enter = on_pointer_enter;
 	state.on_pointer_leave = on_pointer_leave;
